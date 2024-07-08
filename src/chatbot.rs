@@ -1,9 +1,14 @@
+use indicatif::{ProgressBar, ProgressStyle};
 use inquire::{Select, Text};
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
 use std::error::Error;
+use std::sync::Arc;
+use std::time::Duration;
+use tokio::sync::Mutex;
+use tokio::time::sleep;
 
 #[derive(Serialize)]
 struct ChatGPTRequest {
@@ -42,16 +47,49 @@ async fn send_request(api_key: &str, prompt: &str) -> Result<String, Box<dyn Err
         messages,
     };
 
-    let response = client
-        .post(url)
-        .header("Authorization", format!("Bearer {}", api_key))
-        .json(&request_body)
-        .send()
-        .await?;
+    let progress_bar = Arc::new(Mutex::new(ProgressBar::new(60)));
+    let progress_bar_clone = Arc::clone(&progress_bar);
 
-    let response_json: ChatGPTResponse = response.json().await?;
+    progress_bar.lock().await.set_style(
+        ProgressStyle::default_bar()
+            .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {msg}")?
+            .progress_chars("#>-"),
+    );
 
-    Ok(response_json.choices[0].message.content.clone())
+    let api_key_clone = api_key.to_string();
+
+    let request_task = tokio::spawn(async move {
+        // Make the HTTP GET request
+        client
+            .post(url)
+            .header("Authorization", format!("Bearer {}", &api_key_clone))
+            .json(&request_body)
+            .send()
+            .await
+            .expect("Failed ChatGPT request")
+    });
+
+    let progress_task = tokio::spawn(async move {
+        let pb = progress_bar_clone.lock().await;
+        for _i in 0..60 {
+            pb.inc(1);
+            sleep(Duration::from_millis(50)).await; // Simulate progress update
+        }
+        pb.finish_with_message("Done?");
+    });
+
+    // Wait for both tasks to complete
+    let (response, _progress) = tokio::join!(request_task, progress_task);
+
+    Ok(response
+        .unwrap()
+        .json::<ChatGPTResponse>()
+        .await
+        .unwrap()
+        .choices[0]
+        .message
+        .content
+        .clone())
 }
 
 async fn complete_prompt(
@@ -64,7 +102,6 @@ async fn complete_prompt(
     let prompt = format!("{}. {}", &prompt_start, &answer);
 
     let response = send_request(&api_key, &prompt).await.unwrap();
-    println!("Response: {}", response);
 
     Ok(response)
 }
@@ -73,7 +110,6 @@ async fn random_list(prompt_start: &str, token: &str) -> Result<String, Box<dyn 
     let prompt = format!("{}. This list should be random and unique.", prompt_start);
 
     let response = send_request(&token, &prompt).await.unwrap();
-    println!("From ChatGPT:\n\n {}", response);
 
     Ok(response)
 }
@@ -151,6 +187,15 @@ pub async fn chatbot() {
                 .prompt()
                 .unwrap();
             }
+
+            let recipe = send_request(
+                &api_key,
+                &format!("please write a recipe for {}", current_choice),
+            )
+            .await
+            .expect("Failed to generate recipe");
+
+            println!("Recipe:\n\n{}", recipe);
 
             // After the list is generated, prompt the user choose one from the list for generating a recipe
         }
