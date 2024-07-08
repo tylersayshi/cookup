@@ -110,7 +110,7 @@ pub async fn chatbot() {
         "List of Recipes" => {
             let dissatisfied = "None of these - Give me a new list!";
 
-            let mut current_choice = dissatisfied;
+            let mut current_choice = dissatisfied.to_string();
 
             while current_choice == dissatisfied {
                 let list_type = Select::new(
@@ -133,13 +133,16 @@ pub async fn chatbot() {
                         random_list(prompts.get("List of Recipes").unwrap(), &api_key).await
                     }
                     _ => panic!("Invalid list type"),
-                };
+                }
+                .unwrap();
 
-                let res = chat_response.unwrap();
+                let mut recipe_ideas: Vec<_> = chat_response
+                    .split("\n")
+                    .filter(|x| !x.is_empty())
+                    .map(|x| x.to_string())
+                    .collect();
 
-                let mut recipe_ideas: Vec<_> = res.split("\n").filter(|x| !x.is_empty()).collect();
-
-                recipe_ideas.push("None of these - Give me a new list!");
+                recipe_ideas.push("None of these - Give me a new list!".to_string());
 
                 current_choice = Select::new(
                     "Which recipe would you like to choose?",
