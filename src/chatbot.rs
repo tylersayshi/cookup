@@ -135,13 +135,15 @@ pub async fn chatbot() {
 
     match choice {
         "One Recipe" => {
-            complete_prompt(
+            let recipe = complete_prompt(
                 prompts.get("One Recipe").unwrap(),
                 &api_key,
                 "Describe your dish:",
             )
             .await
             .expect("Failed to generate recipe");
+
+            println!("Recipe:\n\n{}", recipe);
         }
         "List of Recipes" => {
             let dissatisfied = "None of these - Give me a new list!";
@@ -196,8 +198,6 @@ pub async fn chatbot() {
             .expect("Failed to generate recipe");
 
             println!("Recipe:\n\n{}", recipe);
-
-            // After the list is generated, prompt the user choose one from the list for generating a recipe
         }
         _ => {
             println!("Invalid choice");
