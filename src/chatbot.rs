@@ -133,9 +133,9 @@ pub async fn chatbot() {
     .prompt()
     .unwrap();
 
-    match choice {
+    let recipe: Result<String, String> = match choice {
         "One Recipe" => {
-            let recipe = complete_prompt(
+            let res = complete_prompt(
                 prompts.get("One Recipe").unwrap(),
                 &api_key,
                 "Describe your dish:",
@@ -143,7 +143,7 @@ pub async fn chatbot() {
             .await
             .expect("Failed to generate recipe");
 
-            println!("Recipe:\n\n{}", recipe);
+            Ok(res)
         }
         "List of Recipes" => {
             let dissatisfied = "None of these - Give me a new list!";
@@ -190,18 +190,20 @@ pub async fn chatbot() {
                 .unwrap();
             }
 
-            let recipe = send_request(
+            let res = send_request(
                 &api_key,
                 &format!("please write a recipe for {}", current_choice),
             )
             .await
             .expect("Failed to generate recipe");
+            Ok(res)
+        }
+        _ => Err("Invalid choice".to_string()),
+    };
 
-            println!("Recipe:\n\n{}", recipe);
-        }
-        _ => {
-            println!("Invalid choice");
-        }
+    match recipe {
+        Ok(recipe) => println!("Recipe:\n\n{}", recipe),
+        Err(err) => println!("Error: {}", err),
     }
 
     // Send the request and print the response
