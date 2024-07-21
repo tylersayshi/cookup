@@ -1,6 +1,7 @@
 use indicatif::{ProgressBar, ProgressStyle};
-use inquire::{Select, Text};
+use inquire::{Confirm, Select, Text};
 use reqwest::Client;
+use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
@@ -9,6 +10,8 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::Mutex;
 use tokio::time::sleep;
+
+use crate::utils::Recipe;
 
 #[derive(Serialize)]
 struct ChatGPTRequest {
@@ -30,6 +33,25 @@ struct ChatGPTResponse {
 #[derive(Deserialize)]
 struct Choice {
     message: Message,
+}
+
+fn parse_recipe(recipe: &str, name: &str) -> Result<Recipe, String> {
+    let ingredients_ind = recipe.find("Ingredients:").unwrap();
+    let instructions_ind = recipe.find("Instructions:").unwrap();
+
+    let ingredients =
+        recipe[(ingredients_ind + "Ingredients:".len() + 1)..instructions_ind - 1].to_string();
+    let instructions = recipe[(instructions_ind + "Instructions:".len() + 1)..].to_string();
+
+    if instructions == "" || ingredients == "" {
+        return Err(format!("Invalid recipe\n {}", recipe));
+    }
+
+    Ok(Recipe {
+        name: name.to_string(),
+        instructions,
+        ingredients,
+    })
 }
 
 async fn send_request(api_key: &str, prompt: &str) -> Result<String, Box<dyn Error>> {
@@ -114,6 +136,37 @@ async fn random_list(prompt_start: &str, token: &str) -> Result<String, Box<dyn 
     Ok(response)
 }
 
+fn save_recipe(recipe: &Recipe) -> Result<String, String> {
+    let res: Result<String, Box<dyn Error>> = {
+        let conn = Connection::open("cookbook.db").unwrap();
+
+        conn.execute(
+            "INSERT INTO recipes (name, instructions, ingredients) VALUES (?1, ?2, ?3)",
+            params![recipe.name, recipe.instructions, recipe.ingredients],
+        )
+        .unwrap();
+
+        conn.close().unwrap();
+
+        Ok(format!("Saved {}", recipe.name))
+    };
+
+    match res {
+        Ok(res) => Ok(res),
+        Err(_err) => Err("Failed to save recipe".to_string()),
+    }
+}
+
+fn do_you_want_to_save(recipe: &Recipe) -> Result<String, String> {
+    let ans = Confirm::new("Do you want to save this recipe? (Y/n)").prompt();
+
+    match ans {
+        Ok(true) => save_recipe(recipe),
+        Ok(false) => Ok("Not saved".to_string()),
+        Err(err) => Err(err.to_string()),
+    }
+}
+
 pub async fn chatbot() {
     let api_key =
         env::var("OPENAI_API_KEY").expect("Please set the OPENAI_API_KEY environment variable.");
@@ -133,17 +186,17 @@ pub async fn chatbot() {
     .prompt()
     .unwrap();
 
-    let recipe: Result<String, String> = match choice {
+    let recipe_result: Result<(Recipe, String), String> = match choice {
         "One Recipe" => {
-            let res = complete_prompt(
-                prompts.get("One Recipe").unwrap(),
-                &api_key,
-                "Describe your dish:",
-            )
-            .await
-            .expect("Failed to generate recipe");
+            let name = prompts.get("One Recipe").unwrap();
 
-            Ok(res)
+            let res = complete_prompt(name, &api_key, "Describe your dish:")
+                .await
+                .expect("Failed to generate recipe");
+
+            let recipe = parse_recipe(&res, name).unwrap();
+
+            Ok((recipe, res))
         }
         "List of Recipes" => {
             let dissatisfied = "None of these - Give me a new list!";
@@ -196,13 +249,21 @@ pub async fn chatbot() {
             )
             .await
             .expect("Failed to generate recipe");
-            Ok(res)
+
+            let name = current_choice.split(". ").nth(1).unwrap();
+            let recipe = parse_recipe(&res, name).unwrap();
+
+            Ok((recipe, res))
         }
         _ => Err("Invalid choice".to_string()),
     };
 
-    match recipe {
-        Ok(recipe) => println!("Recipe:\n\n{}", recipe),
+    match recipe_result {
+        Ok((parsed_recipe, full_recipe)) => {
+            println!("Recipe:\n\n{}", full_recipe);
+            let save_msg = do_you_want_to_save(&parsed_recipe).unwrap();
+            println!("{}", save_msg);
+        }
         Err(err) => println!("Error: {}", err),
     }
 

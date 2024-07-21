@@ -36,7 +36,7 @@ async fn main() {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 name TEXT NOT NULL,
                 instructions TEXT NOT NULL,
-                ingredients TEXT NOT NULL,
+                ingredients TEXT NOT NULL
             )",
             [],
         )
@@ -68,3 +68,5 @@ async fn main() {
 // Need a name per each recipe
 //   - need to be able to edit the name
 // need to be able to parse ingredients and instructions
+
+// TODO: ctrl-some key to go back
