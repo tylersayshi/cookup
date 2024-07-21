@@ -70,3 +70,4 @@ async fn main() {
 // need to be able to parse ingredients and instructions
 
 // TODO: ctrl-some key to go back
+// TODO: ctrl+c to exit

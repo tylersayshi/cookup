@@ -10,3 +10,12 @@ pub struct Recipe {
     pub instructions: String,
     pub ingredients: String,
 }
+
+#[derive(Debug)]
+pub struct DBRecipe {
+    pub id: i32,
+    pub created_at: String,
+    pub name: String,
+    pub instructions: String,
+    pub ingredients: String,
+}
