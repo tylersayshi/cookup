@@ -1,3 +1,6 @@
+use inquire::Text;
+
 pub fn recipes() {
-    println!("You chose the recipes - Not implemented yet");
+    let answer = Text::new("Name of the recipe: ").prompt().unwrap();
+    println!("your recipe is called {}", &answer);
 }
