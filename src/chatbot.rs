@@ -1,7 +1,6 @@
 use indicatif::{ProgressBar, ProgressStyle};
 use inquire::{Confirm, Select, Text};
 use reqwest::Client;
-use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::env;
@@ -136,32 +135,11 @@ async fn random_list(prompt_start: &str, token: &str) -> Result<String, Box<dyn 
     Ok(response)
 }
 
-fn save_recipe(recipe: &Recipe) -> Result<String, String> {
-    let res: Result<String, Box<dyn Error>> = {
-        let conn = Connection::open("cookbook.db").unwrap();
-
-        conn.execute(
-            "INSERT INTO recipes (name, instructions, ingredients) VALUES (?1, ?2, ?3)",
-            params![recipe.name, recipe.instructions, recipe.ingredients],
-        )
-        .unwrap();
-
-        conn.close().unwrap();
-
-        Ok(format!("Saved {}", recipe.name))
-    };
-
-    match res {
-        Ok(res) => Ok(res),
-        Err(_err) => Err("Failed to save recipe".to_string()),
-    }
-}
-
 fn do_you_want_to_save(recipe: &Recipe) -> Result<String, String> {
     let ans = Confirm::new("Do you want to save this recipe? (Y/n)").prompt();
 
     match ans {
-        Ok(true) => save_recipe(recipe),
+        Ok(true) => crate::utils::save_recipe(recipe),
         Ok(false) => Ok("Not saved".to_string()),
         Err(err) => Err(err.to_string()),
     }

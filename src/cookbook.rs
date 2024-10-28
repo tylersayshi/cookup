@@ -36,8 +36,8 @@ pub fn cookbook() {
     let full_recipe = {
         let recipe = recipes.get(choice.index).unwrap();
         format!(
-            "\nRecipe: {}\n\nIngredients:\n{}\nInstructions:\n{}",
-            recipe.name, recipe.ingredients, recipe.instructions
+            "\n Created at: {}\n\nRecipe: {}\n\nIngredients:\n{}\nInstructions:\n{}",
+            recipe.created_at, recipe.name, recipe.ingredients, recipe.instructions
         )
     };
 
