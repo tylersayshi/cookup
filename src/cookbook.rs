@@ -6,8 +6,8 @@ use crate::utils::DBRecipe;
 pub fn cookbook() {
     let conn = Connection::open("cookbook.db").unwrap();
 
-    let mut recipes: Vec<DBRecipe> = conn
-        .prepare("SELECT * FROM recipes ORDER BY id DESC")
+    let recipes: Vec<DBRecipe> = conn
+        .prepare("SELECT * FROM recipes ORDER BY id ASC")
         .unwrap()
         .query_map([], |row| {
             Ok(DBRecipe {
@@ -21,8 +21,6 @@ pub fn cookbook() {
         .unwrap()
         .map(|x| x.unwrap())
         .collect();
-
-    recipes.sort_by(|a, b| a.name.cmp(&b.name));
 
     let options = recipes
         .iter()

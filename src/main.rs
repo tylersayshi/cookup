@@ -4,7 +4,10 @@ mod chatbot;
 mod cookbook;
 mod recipes;
 mod utils;
+use ctrlc;
 use rusqlite::Connection;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 enum Choice {
     Cookbook,
@@ -24,50 +27,69 @@ impl fmt::Display for Choice {
 
 #[tokio::main]
 async fn main() {
-    let cookbook_exists = utils::file_exists("cookbook.db");
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
 
-    if !cookbook_exists {
-        println!("Creating cookbook.db");
-        let conn = Connection::open("cookbook.db").unwrap();
+    ctrlc::set_handler(move || {
+        println!("Received Ctrl+C, exiting...");
+        r.store(false, Ordering::SeqCst);
+    })
+    .expect("Error setting Ctrl+C handler");
 
-        conn.execute(
-            "CREATE TABLE recipes (
-                id INTEGER PRIMARY KEY,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                name TEXT NOT NULL,
-                instructions TEXT NOT NULL,
-                ingredients TEXT NOT NULL
-            )",
-            [],
-        )
-        .unwrap();
+    while running.load(Ordering::SeqCst) {
+        let cookbook_exists = utils::file_exists("cookbook.db");
 
-        conn.close().unwrap();
+        if !cookbook_exists {
+            println!("Creating cookbook.db");
+            let conn = Connection::open("cookbook.db").unwrap();
+
+            conn.execute(
+                "CREATE TABLE recipes (
+                    id INTEGER PRIMARY KEY,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    name TEXT NOT NULL,
+                    instructions TEXT NOT NULL,
+                    ingredients TEXT NOT NULL
+                )",
+                [],
+            )
+            .unwrap();
+
+            conn.close().unwrap();
+        }
+
+        let options = vec![Choice::Cookbook, Choice::Chatbot, Choice::NewRecipe];
+
+        let choice = Select::new("What would you like to cook up today?", options).prompt();
+
+        match choice {
+            Ok(selection) => match selection {
+                Choice::Cookbook => {
+                    cookbook::cookbook();
+                }
+                Choice::Chatbot => {
+                    chatbot::chatbot().await;
+                }
+                Choice::NewRecipe => {
+                    recipes::recipes();
+                }
+            },
+            Err(inquire::error::InquireError::OperationInterrupted) => {
+                // nothing to do
+                break;
+            }
+            Err(err) => {
+                eprintln!("Error: {:?}", err);
+                break;
+            }
+        }
     }
 
-    let options = vec![Choice::Cookbook, Choice::Chatbot, Choice::NewRecipe];
-
-    let choice = Select::new("What would you like to cookup today?", options)
-        .prompt()
-        .unwrap();
-
-    match choice {
-        Choice::Cookbook => {
-            cookbook::cookbook();
-        }
-        Choice::Chatbot => {
-            chatbot::chatbot().await;
-        }
-        Choice::NewRecipe => {
-            recipes::recipes();
-        }
-    }
+    println!("Goodbye!");
 }
 
 // problems to address:
-// Need a name per each recipe
-//   - need to be able to edit the name
-// need to be able to parse ingredients and instructions
+//  - editable recipes
+//  - parse/validate ingredients and instructions
 
 // TODO: ctrl-some key to go back
-// TODO: ctrl+c to exit
