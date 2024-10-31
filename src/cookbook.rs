@@ -1,30 +1,13 @@
+use crate::read_cookbook::read_cookbook;
 use inquire::Select;
-use rusqlite::Connection;
-
-use crate::utils::DBRecipe;
 
 pub fn cookbook() {
-    let conn = Connection::open("cookbook.db").unwrap();
-
-    let recipes: Vec<DBRecipe> = conn
-        .prepare("SELECT * FROM recipes ORDER BY id ASC")
-        .unwrap()
-        .query_map([], |row| {
-            Ok(DBRecipe {
-                id: row.get(0).unwrap(),
-                created_at: row.get(1).unwrap(),
-                name: row.get(2).unwrap(),
-                instructions: row.get(3).unwrap(),
-                ingredients: row.get(4).unwrap(),
-            })
-        })
-        .unwrap()
-        .map(|x| x.unwrap())
-        .collect();
+    let recipes = read_cookbook();
 
     let options = recipes
         .iter()
-        .map(|x| format!("{}. {}", x.id.clone(), x.name.clone()))
+        .enumerate()
+        .map(|(i, x)| format!("{}. {}", i.clone() + 1, x.name.clone()))
         .collect();
 
     let choice = Select::new("Would you like to cook one of these recipes?", options)

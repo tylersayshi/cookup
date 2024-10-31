@@ -1,11 +1,5 @@
+use chrono::Utc;
 use std::fs;
-
-use rusqlite::{params, Connection};
-use std::error::Error;
-
-pub fn file_exists(path: &str) -> bool {
-    fs::metadata(path).is_ok()
-}
 
 #[derive(Debug)]
 pub struct Recipe {
@@ -15,31 +9,43 @@ pub struct Recipe {
 }
 
 #[derive(Debug)]
-pub struct DBRecipe {
-    pub id: i32,
+pub struct SavedRecipe {
     pub created_at: String,
     pub name: String,
     pub instructions: String,
     pub ingredients: String,
 }
 
+const FILE_PATH: &str = "./cookbook.ts";
+
 pub fn save_recipe(recipe: &Recipe) -> Result<String, String> {
-    let res: Result<String, Box<dyn Error>> = {
-        let conn = Connection::open("cookbook.db").unwrap();
+    // Read the existing TypeScript code
+    let mut source_code = fs::read_to_string(FILE_PATH).expect("Failed to read file");
 
-        conn.execute(
-            "INSERT INTO recipes (name, instructions, ingredients) VALUES (?1, ?2, ?3)",
-            params![recipe.name, recipe.instructions, recipe.ingredients],
-        )
-        .unwrap();
+    let created_at_iso = Utc::now().to_rfc3339()[0..10].to_string();
 
-        conn.close().unwrap();
+    // Create a new entry
+    let new_entry = format!(
+        r#"  {{
+    name: "{name}",
+    ingredients: "{ingredients}",
+    instructions: "{instructions}",
+    created_at: "{created_at_iso}",
+  }},"#,
+        name = recipe.name,
+        ingredients = recipe.ingredients,
+        instructions = recipe.instructions,
+        created_at_iso = created_at_iso,
+    );
 
-        Ok(format!("Saved {}", recipe.name))
-    };
+    // Insert the new entry into the default export array
+    source_code = source_code.replace(
+        "] satisfies Recipe[];",
+        &format!("{}\n] satisfies Recipe[];", new_entry),
+    );
 
-    match res {
-        Ok(res) => Ok(res),
-        Err(_err) => Err("Failed to save recipe".to_string()),
-    }
+    // Write the updated source code back to the original file
+    fs::write(FILE_PATH, source_code).expect("Failed to write updated code");
+
+    Ok("Saved recipe".to_string())
 }

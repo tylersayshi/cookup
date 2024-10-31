@@ -2,10 +2,10 @@ use inquire::Select;
 use std::fmt;
 mod chatbot;
 mod cookbook;
-mod recipes;
+mod read_cookbook;
 mod utils;
+mod write_recipe;
 use ctrlc;
-use rusqlite::Connection;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 
@@ -37,27 +37,6 @@ async fn main() {
     .expect("Error setting Ctrl+C handler");
 
     while running.load(Ordering::SeqCst) {
-        let cookbook_exists = utils::file_exists("cookbook.db");
-
-        if !cookbook_exists {
-            println!("Creating cookbook.db");
-            let conn = Connection::open("cookbook.db").unwrap();
-
-            conn.execute(
-                "CREATE TABLE recipes (
-                    id INTEGER PRIMARY KEY,
-                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                    name TEXT NOT NULL,
-                    instructions TEXT NOT NULL,
-                    ingredients TEXT NOT NULL
-                )",
-                [],
-            )
-            .unwrap();
-
-            conn.close().unwrap();
-        }
-
         let options = vec![Choice::Cookbook, Choice::Chatbot, Choice::NewRecipe];
 
         let choice = Select::new("What would you like to cook up today?", options).prompt();
@@ -71,7 +50,7 @@ async fn main() {
                     chatbot::chatbot().await;
                 }
                 Choice::NewRecipe => {
-                    recipes::recipes();
+                    write_recipe::recipes();
                 }
             },
             Err(inquire::error::InquireError::OperationInterrupted) => {
@@ -83,6 +62,8 @@ async fn main() {
                 break;
             }
         }
+
+        break;
     }
 
     println!("Goodbye!");

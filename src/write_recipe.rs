@@ -1,6 +1,6 @@
 use inquire::{Editor, Text};
 
-use crate::utils::Recipe;
+use crate::utils::{save_recipe, Recipe};
 
 pub fn recipes() {
     let answer = Text::new("Name of the recipe: ").prompt().unwrap();
@@ -18,5 +18,5 @@ pub fn recipes() {
         ingredients,
         instructions,
     };
-    crate::utils::save_recipe(&recipe).unwrap();
+    let _ = save_recipe(&recipe);
 }
