@@ -68,4 +68,38 @@ export default [
 9. Enjoy your delicious blueberry lemon ricotta pancakes!`,
     created_at: "2024-10-30",
   },
+  {
+    name: "Spicy mango chicken tacos with avocado sauce",
+    ingredients: `
+- 2 boneless, skinless chicken breasts
+- 1 mango, diced
+- 1/2 red onion, diced
+- 1 jalapeno, minced
+- 1/4 cup chopped cilantro
+- 1 tbsp cumin
+- 1 tbsp chili powder
+- 1 tbsp garlic powder
+- Salt and pepper to taste
+- 1 ripe avocado
+- 1/4 cup Greek yogurt
+- Juice of 1 lime
+- 4 small tortillas
+- Optional toppings: sliced radishes, shredded cabbage, crumbled queso fresco
+`, 
+    instructions: `
+1. In a small bowl, mix together the cumin, chili powder, garlic powder, salt, and pepper. Rub the spice mixture onto the chicken breasts.
+
+2. Heat a grill or grill pan over medium heat. Cook the chicken breasts for about 5-6 minutes per side, or until cooked through. Remove from heat and let rest for a few minutes before slicing into thin strips.
+
+3. In a medium bowl, combine the diced mango, red onion, jalapeno, and cilantro. Squeeze the juice of half a lime over the mixture and season with salt and pepper.
+
+4. In a separate bowl, mash the avocado with the Greek yogurt and the juice of the remaining half of lime. Season with salt and pepper.
+
+5. Warm the tortillas in a dry skillet over medium heat for about 30 seconds per side.
+
+6. To assemble the tacos, spoon some of the avocado sauce onto each tortilla. Top with the sliced chicken, mango salsa, and any additional toppings you desire.
+
+7. Serve the tacos with extra lime wedges on the side for squeezing over the top. Enjoy your spicy mango chicken tacos with avocado sauce!`, 
+    created_at: "2024-10-30",
+  },
 ] satisfies Recipe[];
