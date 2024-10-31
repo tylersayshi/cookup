@@ -43,4 +43,29 @@ export default [
 4. bake 15-17 mins
 `,
   },
+  {
+    name: "Blueberry lemon ricotta pancakes with maple syrup and fresh berries.",
+    ingredients: `- 1 cup all-purpose flour
+- 1 tablespoon sugar
+- 1 teaspoon baking powder
+- 1/2 teaspoon baking soda
+- 1/4 teaspoon salt
+- 1 cup ricotta cheese
+- 1/2 cup milk
+- 2 eggs
+- 1 tablespoon lemon zest
+- 1 cup blueberries
+- Maple syrup and fresh berries for topping
+`,
+    instructions: `1. In a large mixing bowl, whisk together the flour, sugar, baking powder, baking soda, and salt.
+2. In a separate bowl, combine the ricotta cheese, milk, eggs, and lemon zest. Mix well.
+3. Pour the wet ingredients into the dry ingredients and stir until just combined. Be careful not to overmix.
+4. Gently fold in the blueberries.
+5. Heat a non-stick skillet or griddle over medium heat and lightly grease with butter or cooking spray.
+6. Pour 1/4 cup of batter onto the skillet for each pancake. Cook until bubbles form on the surface, then flip and cook for another 1-2 minutes until golden brown.
+7. Repeat with the remaining batter.
+8. Serve the pancakes warm with maple syrup and fresh berries on top.
+9. Enjoy your delicious blueberry lemon ricotta pancakes!`,
+    created_at: "2024-10-30",
+  },
 ] satisfies Recipe[];
