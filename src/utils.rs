@@ -28,7 +28,7 @@ pub fn save_recipe(recipe: &Recipe) -> Result<String, String> {
     let new_entry = format!(
         r#"  {{
     name: "{name}",
-    ingredients: `{ingredients}`, 
+    ingredients: `{ingredients}`,
     instructions: `{instructions}`, 
     created_at: "{created_at_iso}",
   }},"#,

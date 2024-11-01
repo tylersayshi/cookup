@@ -85,7 +85,7 @@ export default [
 - Juice of 1 lime
 - 4 small tortillas
 - Optional toppings: sliced radishes, shredded cabbage, crumbled queso fresco
-`, 
+`,
     instructions: `
 1. In a small bowl, mix together the cumin, chili powder, garlic powder, salt, and pepper. Rub the spice mixture onto the chicken breasts.
 
@@ -99,7 +99,7 @@ export default [
 
 6. To assemble the tacos, spoon some of the avocado sauce onto each tortilla. Top with the sliced chicken, mango salsa, and any additional toppings you desire.
 
-7. Serve the tacos with extra lime wedges on the side for squeezing over the top. Enjoy your spicy mango chicken tacos with avocado sauce!`, 
+7. Serve the tacos with extra lime wedges on the side for squeezing over the top. Enjoy your spicy mango chicken tacos with avocado sauce!`,
     created_at: "2024-10-30",
   },
 ] satisfies Recipe[];
