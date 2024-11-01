@@ -117,14 +117,14 @@ async fn complete_prompt(
     prompt_start: &str,
     api_key: &str,
     question: &str,
-) -> Result<String, Box<dyn Error>> {
+) -> Result<(String, String), Box<dyn Error>> {
     let answer = Text::new(question).prompt().unwrap();
 
     let prompt = format!("{}. {}", &prompt_start, &answer);
 
     let response = send_request(&api_key, &prompt).await.unwrap();
 
-    Ok(response)
+    Ok((answer, response))
 }
 
 async fn random_list(prompt_start: &str, token: &str) -> Result<String, Box<dyn Error>> {
@@ -166,13 +166,13 @@ pub async fn chatbot() {
 
     let recipe_result: Result<(Recipe, String), String> = match choice {
         "One Recipe" => {
-            let name = prompts.get("One Recipe").unwrap();
+            let question = prompts.get("One Recipe").unwrap();
 
-            let res = complete_prompt(name, &api_key, "Describe your dish:")
+            let (name, res) = complete_prompt(question, &api_key, "Describe your dish:")
                 .await
                 .expect("Failed to generate recipe");
 
-            let recipe = parse_recipe(&res, name).unwrap();
+            let recipe = parse_recipe(&res, &name).unwrap();
 
             Ok((recipe, res))
         }
@@ -191,12 +191,15 @@ pub async fn chatbot() {
 
                 let chat_response = match list_type {
                     "I have some ideas" => {
-                        complete_prompt(
+                        let (_, res) = complete_prompt(
                             prompts.get("List of Recipes").unwrap(),
                             &api_key,
                             "What are your ideas?",
                         )
                         .await
+                        .unwrap();
+
+                        Ok(res)
                     }
                     "Random" => {
                         random_list(prompts.get("List of Recipes").unwrap(), &api_key).await

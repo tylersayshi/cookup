@@ -102,4 +102,32 @@ export default [
 7. Serve the tacos with extra lime wedges on the side for squeezing over the top. Enjoy your spicy mango chicken tacos with avocado sauce!`,
     created_at: "2024-10-30",
   },
+  {
+    name: "Chicken quesidilla served over a pillowy bowl of ice cream with a side of pickled parrot",
+    ingredients: `- 1 cup cooked and shredded chicken
+- 4 large flour tortillas
+- 1 cup shredded cheese (cheddar, pepper jack, or a mix)
+- 1/2 cup diced tomatoes
+- 1/4 cup diced onions
+- 1/4 cup diced bell peppers
+- Salt and pepper to taste
+- 1/2 cup sour cream
+- 1/4 cup salsa
+- 4 scoops of your favorite ice cream
+- Pickled parrot (store-bought or homemade)
+`,
+    instructions: `1. Preheat a large skillet over medium heat.
+2. Place one tortilla in the skillet and sprinkle with a layer of cheese.
+3. Add a layer of chicken, tomatoes, onions, and bell peppers on top of the cheese.
+4. Sprinkle with another layer of cheese and top with another tortilla.
+5. Cook for 3-4 minutes on each side, or until the tortilla is golden brown and the cheese is melted.
+6. Repeat with the remaining tortillas and ingredients.
+7. Meanwhile, scoop the ice cream into individual bowls.
+8. Once the quesadillas are cooked, carefully slice them into quarters.
+9. Place a quarter of the quesadilla on top of each bowl of ice cream.
+10. Serve with a dollop of sour cream and salsa on the side.
+11. Garnish with pickled parrot on the side.
+12. Enjoy your unique and delicious chicken quesadilla served over a pillowy bowl of ice cream with a side of pickled parrot!`,
+    created_at: "2024-10-31",
+  },
 ] satisfies Recipe[];

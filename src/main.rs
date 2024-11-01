@@ -54,7 +54,7 @@ async fn main() {
                 }
             },
             Err(inquire::error::InquireError::OperationInterrupted) => {
-                // nothing to do
+                println!("Goodbye!");
                 break;
             }
             Err(err) => {
@@ -65,12 +65,4 @@ async fn main() {
 
         break;
     }
-
-    println!("Goodbye!");
 }
-
-// problems to address:
-//  - editable recipes
-//  - parse/validate ingredients and instructions
-
-// TODO: ctrl-some key to go back
