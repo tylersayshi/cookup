@@ -15,8 +15,6 @@ enum Choice {
     NewRecipe,
 }
 
-// Comment to test CI
-
 impl fmt::Display for Choice {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
