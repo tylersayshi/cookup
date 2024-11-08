@@ -3,7 +3,7 @@ use swc_common::{sync::Lrc, FileName, SourceMap};
 use swc_ecma_ast::{Expr, Module, ModuleDecl, TsSatisfiesExpr};
 use swc_ecma_parser::{lexer::Lexer, Parser, StringInput, Syntax, TsSyntax};
 
-use crate::utils::SavedRecipe;
+use crate::utils::{get_storage_path, SavedRecipe};
 
 fn extract_default_export_list(module: &Module) -> Option<Vec<SavedRecipe>> {
     for item in &module.body {
@@ -108,8 +108,9 @@ fn extract_default_export_list(module: &Module) -> Option<Vec<SavedRecipe>> {
 pub fn read_cookbook() -> Vec<SavedRecipe> {
     let cm: Lrc<SourceMap> = Default::default();
 
-    let file_path = "./cookbook.ts";
-    let code = fs::read_to_string(file_path).expect("Failed to read file");
+    let file_path = get_storage_path().unwrap();
+    let code = fs::read_to_string(&file_path)
+        .unwrap_or_else(|_| panic!("Failed to read file: {}", file_path));
 
     let fm = cm.new_source_file(FileName::Real(file_path.into()).into(), code);
 
