@@ -9,7 +9,6 @@ A little tool for building my cookbook.
 Set an open ai api key as `$OPENAI_API_KEY`: https://platform.openai.com/docs/quickstart
 
 ```sh
-$ clone
 $ cargo build --release
 $ ln -sF ./target/release/cookup ~/bin/cookup # ~/bin will need to exist in $PATH
 $ cookup
